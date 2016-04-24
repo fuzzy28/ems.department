@@ -16,7 +16,7 @@ public class CounterMetricsAspect {
     @Autowired
     private CounterService counterService;
 
-    @Before("execution(* org.jrue.ems.department.service.DepartmentService.*(..))")
+    @Before("execution(* org.jrue.ems.department.service.*Service.*(..))")
     public void increment(JoinPoint joinPoint) throws Throwable {
 	counterService.increment(joinPoint.getSignature().toShortString());
     }
