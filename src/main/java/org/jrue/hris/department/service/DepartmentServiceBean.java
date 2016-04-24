@@ -1,9 +1,9 @@
-package org.jrue.hris.master.service;
+package org.jrue.hris.department.service;
 
 import java.util.Collection;
 
-import org.jrue.hris.master.domain.Department;
-import org.jrue.hris.master.repository.DepartmentRepository;
+import org.jrue.hris.department.domain.Department;
+import org.jrue.hris.department.repository.DepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of Department Service
- *  
+ * 
  * @author Joel F. Ruelos Jr.
  * @since 1.0
  */
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DepartmentServiceBean implements DepartmentService {
 
     @Autowired
-    DepartmentRepository departmentRepository;
+    private DepartmentRepository departmentRepository;
 
     @Override
     public Collection<Department> findAll() {
@@ -39,7 +39,7 @@ public class DepartmentServiceBean implements DepartmentService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    @CachePut(value = "departments", key = "#result.id",  condition = "#result != null")
+    @CachePut(value = "departments", key = "#result.id", condition = "#result != null")
     public Department save(Department persist) {
 
 	Department department = null;
@@ -73,5 +73,10 @@ public class DepartmentServiceBean implements DepartmentService {
     @CacheEvict(value = "departments", key = "#id")
     public void delete(Long id) {
 	departmentRepository.delete(id);
+    }
+
+    @Override
+    public long countAll() {
+	return departmentRepository.count();
     }
 }

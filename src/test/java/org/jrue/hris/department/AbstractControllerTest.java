@@ -1,4 +1,4 @@
-package org.jrue.hris.master;
+package org.jrue.hris.department;
 
 import java.io.IOException;
 

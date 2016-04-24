@@ -1,4 +1,4 @@
-package org.jrue.hris.master.domain;
+package org.jrue.hris.department.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

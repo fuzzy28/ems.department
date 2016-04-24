@@ -1,9 +1,9 @@
-package org.jrue.hris.master.controller;
+package org.jrue.hris.department.controller;
 
 import java.util.Collection;
 
-import org.jrue.hris.master.domain.Department;
-import org.jrue.hris.master.service.DepartmentService;
+import org.jrue.hris.department.domain.Department;
+import org.jrue.hris.department.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

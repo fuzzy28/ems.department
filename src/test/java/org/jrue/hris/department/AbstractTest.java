@@ -1,6 +1,6 @@
-package org.jrue.hris.master;
+package org.jrue.hris.department;
 
-import org.jrue.hris.master.Application;
+import org.jrue.hris.department.Application;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;

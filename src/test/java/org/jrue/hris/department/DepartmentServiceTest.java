@@ -1,9 +1,9 @@
-package org.jrue.hris.master;
+package org.jrue.hris.department;
 
 import javax.transaction.Transactional;
 
-import org.jrue.hris.master.domain.Department;
-import org.jrue.hris.master.service.DepartmentService;
+import org.jrue.hris.department.domain.Department;
+import org.jrue.hris.department.service.DepartmentService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.Assert.*;
