@@ -10,7 +10,8 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * Application Startup Class
+ * Application Startup Class. It serves as both the runtime application entry
+ * point and the central Java configuration class.
  * 
  * @author Joel F. Ruelos Jr.
  * @since 1.0

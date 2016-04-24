@@ -15,8 +15,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Restful Controller for Department domain which 
- * allows client to manipulate the resource.
+ * The DepartmentController class is a RESTful web service controller. The
+ * <code>@RestController</code> annotation informs Spring that each
+ * <code>@RequestMapping</code> method returns a <code>@ResponseBody</code>
+ * which, by default, contains a ResponseEntity converted into JSON with an
+ * associated HTTP status code.
+ * 
  * @author Joel F. Ruelos Jr.
  * @since 1.0
  */
@@ -65,7 +69,8 @@ public class DepartmentController {
 	return response;
     }
 
-    @RequestMapping(path = "/{id}",
+    @RequestMapping(
+	    path = "/{id}",
 	    method = RequestMethod.PUT,
 	    consumes = MediaType.APPLICATION_JSON_VALUE,
 	    produces = MediaType.APPLICATION_JSON_VALUE)
