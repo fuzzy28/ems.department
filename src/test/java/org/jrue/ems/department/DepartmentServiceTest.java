@@ -1,9 +1,9 @@
-package org.jrue.hris.department;
+package org.jrue.ems.department;
 
 import javax.transaction.Transactional;
 
-import org.jrue.hris.department.domain.Department;
-import org.jrue.hris.department.service.DepartmentService;
+import org.jrue.ems.department.domain.Department;
+import org.jrue.ems.department.service.DepartmentService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.Assert.*;

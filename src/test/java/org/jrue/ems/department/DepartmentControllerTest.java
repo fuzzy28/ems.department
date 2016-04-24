@@ -1,12 +1,12 @@
-package org.jrue.hris.department;
+package org.jrue.ems.department;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.transaction.Transactional;
 
-import org.jrue.hris.department.controller.DepartmentController;
-import org.jrue.hris.department.domain.Department;
-import org.jrue.hris.department.service.DepartmentService;
+import org.jrue.ems.department.controller.DepartmentController;
+import org.jrue.ems.department.domain.Department;
+import org.jrue.ems.department.service.DepartmentService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

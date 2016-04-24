@@ -1,6 +1,6 @@
-package org.jrue.hris.department.actuator;
+package org.jrue.ems.department.actuator;
 
-import org.jrue.hris.department.service.DepartmentService;
+import org.jrue.ems.department.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;

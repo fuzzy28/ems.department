@@ -1,4 +1,4 @@
-package org.jrue.hris.department.aspect;
+package org.jrue.ems.department.aspect;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -16,7 +16,7 @@ public class CounterMetricsAspect {
     @Autowired
     private CounterService counterService;
 
-    @Before("execution(* org.jrue.hris.department.service.DepartmentService.*(..))")
+    @Before("execution(* org.jrue.ems.department.service.DepartmentService.*(..))")
     public void increment(JoinPoint joinPoint) throws Throwable {
 	counterService.increment(joinPoint.getSignature().toShortString());
     }

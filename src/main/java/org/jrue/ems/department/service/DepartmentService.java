@@ -1,8 +1,8 @@
-package org.jrue.hris.department.service;
+package org.jrue.ems.department.service;
 
 import java.util.Collection;
 
-import org.jrue.hris.department.domain.Department;
+import org.jrue.ems.department.domain.Department;
 
 /**
  * Department Service Interface

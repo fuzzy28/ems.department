@@ -1,4 +1,4 @@
-package org.jrue.hris.department.domain;
+package org.jrue.ems.department.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

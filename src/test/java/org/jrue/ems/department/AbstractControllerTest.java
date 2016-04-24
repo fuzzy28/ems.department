@@ -1,4 +1,4 @@
-package org.jrue.hris.department;
+package org.jrue.ems.department;
 
 import java.io.IOException;
 

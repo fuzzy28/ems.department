@@ -1,6 +1,6 @@
-package org.jrue.hris.department;
+package org.jrue.ems.department;
 
-import org.jrue.hris.department.Application;
+import org.jrue.ems.department.Application;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;

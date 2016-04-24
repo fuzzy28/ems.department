@@ -1,9 +1,9 @@
-package org.jrue.hris.department.service;
+package org.jrue.ems.department.service;
 
 import java.util.Collection;
 
-import org.jrue.hris.department.domain.Department;
-import org.jrue.hris.department.repository.DepartmentRepository;
+import org.jrue.ems.department.domain.Department;
+import org.jrue.ems.department.repository.DepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;

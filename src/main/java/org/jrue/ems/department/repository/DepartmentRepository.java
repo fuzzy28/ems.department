@@ -1,6 +1,6 @@
-package org.jrue.hris.department.repository;
+package org.jrue.ems.department.repository;
 
-import org.jrue.hris.department.domain.Department;
+import org.jrue.ems.department.domain.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
