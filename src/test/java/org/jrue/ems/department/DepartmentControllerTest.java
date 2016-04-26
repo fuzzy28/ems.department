@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -32,279 +33,205 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 @Transactional
 public class DepartmentControllerTest extends AbstractControllerTest {
 
-    private final String BASE_URI = "/departments";
-
-    @Mock
-    protected DepartmentService departmentService;
-
-    @InjectMocks
-    protected DepartmentController departmentController;
-
-    @Before
-    public void setup() {
-	MockitoAnnotations.initMocks(this);
-
-	setup(departmentController);
-    }
+	private final String BASE_URI = "/departments";
 
-    protected Collection<Department> getAllDepartments() {
-	Collection<Department> deps = new ArrayList<>();
-	Department sdd = new Department();
-	sdd.setId(1L);
-	sdd.setDepartmentCode("SDD");
-	sdd.setDepartmentName("SOFTWARE DEVELOPMENT DEPARTMENT");
-	sdd.setActive(true);
-	deps.add(sdd);
+	@Mock
+	protected DepartmentService departmentService;
 
-	Department fep = new Department();
-	fep.setId(2L);
-	fep.setDepartmentCode("FEP");
-	fep.setDepartmentName("FRONT END PROCESSING DEPARTMENT");
-	fep.setActive(true);
-	deps.add(fep);
-	return deps;
-    }
+	@InjectMocks
+	protected DepartmentController departmentController;
 
-    protected Department getSingleDepartment(Long id) {
-	return getAllDepartments()
-		.stream()
-		.filter(d -> d.getId() == id)
-		.findFirst()
-		.get();
-    }
+	@Before
+	public void setup() {
+		MockitoAnnotations.initMocks(this);
 
-    @Test
-    public void whenFetchingAllThenShouldListAvailableDepartments() throws Exception {
-	when(departmentService.findAll()).thenReturn(getAllDepartments());
+		setup(departmentController);
+	}
 
-	MvcResult response = mockMvc
-		.perform(
-			MockMvcRequestBuilders
-				.get(BASE_URI)
-				.accept(MediaType.APPLICATION_JSON_VALUE))
-		.andReturn();
-
-	assertSuccessStatusAndHasContent(response.getResponse());
-
-	verify(departmentService, times(1)).findAll();
-    }
+	protected Collection<Department> getAllDepartments() {
+		Collection<Department> deps = new ArrayList<>();
+		Department sdd = new Department();
+		sdd.setId(1L);
+		sdd.setDepartmentCode("SDD");
+		sdd.setDepartmentName("SOFTWARE DEVELOPMENT DEPARTMENT");
+		sdd.setActive(true);
+		deps.add(sdd);
 
-    @Test
-    public void whenFindingExistingRecordThenShouldFetchSuccessfully() throws Exception {
-	Long id = 1L;
-	when(departmentService.findOne(any(Long.class)))
-		.thenReturn(getSingleDepartment(id));
+		Department fep = new Department();
+		fep.setId(2L);
+		fep.setDepartmentCode("FEP");
+		fep.setDepartmentName("FRONT END PROCESSING DEPARTMENT");
+		fep.setActive(true);
+		deps.add(fep);
+		return deps;
+	}
 
-	MvcResult response = mockMvc
-		.perform(MockMvcRequestBuilders.get(BASE_URI + "/" + id))
-		.andReturn();
+	protected Department getSingleDepartment(Long id) {
+		Optional<Department> department = getAllDepartments().stream().filter(d -> d.getId() == id).findFirst();
+		return department.isPresent() ? department.get() : null;
+	}
 
-	assertSuccessStatusAndHasContent(response.getResponse());
+	@Test
+	public void whenFetchingAllThenShouldListAvailableDepartments() throws Exception {
+		when(departmentService.findAll()).thenReturn(getAllDepartments());
 
-	verify(departmentService, times(1)).findOne(id);
-    }
+		MvcResult response = mockMvc
+				.perform(MockMvcRequestBuilders.get(BASE_URI).accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
-    @Test
-    public void whenFindingNonExistingRecordThenShouldReturnNotFound() throws Exception {
-	Long id = Long.MAX_VALUE;
-	when(departmentService.findOne(any(Long.class)))
-		.thenReturn(getSingleDepartment(id));
+		assertSuccessStatusAndHasContent(response.getResponse());
 
-	MvcResult response = mockMvc
-		.perform(MockMvcRequestBuilders.get(BASE_URI + "/" + id))
-		.andReturn();
+		verify(departmentService, times(1)).findAll();
+	}
 
-	assertNotFoundStatusAndHasNoContent(response.getResponse());
+	@Test
+	public void whenFindingExistingRecordThenShouldFetchSuccessfully() throws Exception {
+		Long id = 1L;
+		when(departmentService.findOne(any(Long.class))).thenReturn(getSingleDepartment(id));
 
-	verify(departmentService, times(1)).findOne(id);
-    }
+		MvcResult response = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/" + id)).andReturn();
 
-    @Test
-    public void whenSavingWithoutIdThenEntityShouldBeSaved() throws Exception {
-	Department department = getSingleDepartment(1L);
+		assertSuccessStatusAndHasContent(response.getResponse());
 
-	when(departmentService.save(any(Department.class))).thenReturn(department);
+		verify(departmentService, times(1)).findOne(id);
+	}
 
-	MvcResult response = postRequest(super.objectToJson(department));
+	@Test
+	public void whenFindingNonExistingRecordThenShouldReturnNotFound() throws Exception {
+		Long id = Long.MAX_VALUE;
+		when(departmentService.findOne(any(Long.class))).thenReturn(getSingleDepartment(id));
 
-	assertEquals(
-		"failure - status not 201",
-		HttpStatus.CREATED.value(),
-		response.getResponse().getStatus());
+		MvcResult response = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/" + id)).andReturn();
 
-	assertTrue(
-		"failure - content empty",
-		response.getResponse().getContentAsString().trim().length() > 0);
+		assertNotFoundStatusAndHasNoContent(response.getResponse());
 
-	Department persistedHrd = super.jsonToObject(
-		response.getResponse().getContentAsString(),
-		Department.class);
+		verify(departmentService, times(1)).findOne(id);
+	}
 
-	assertNotNull("failure - persisted hrd returns null", persistedHrd);
+	@Test
+	public void whenSavingWithoutIdThenEntityShouldBeSaved() throws Exception {
+		Department department = getSingleDepartment(1L);
 
-	verify(departmentService, times(1)).save(any(Department.class));
+		when(departmentService.save(any(Department.class))).thenReturn(department);
 
-	assertContentEquals(department, persistedHrd);
+		MvcResult response = postRequest(super.objectToJson(department));
 
-    }
+		assertEquals("failure - status not 201", HttpStatus.CREATED.value(), response.getResponse().getStatus());
 
-    @Test
-    public void whenSavingNotSuccessfullThenShouldReturnInternalServerError()
-	    throws Exception {
-	Department department = getSingleDepartment(1L);
+		assertTrue("failure - content empty", response.getResponse().getContentAsString().trim().length() > 0);
 
-	when(departmentService.save(any(Department.class))).thenReturn(null);
+		Department persistedHrd = super.jsonToObject(response.getResponse().getContentAsString(), Department.class);
 
-	MvcResult response = postRequest(super.objectToJson(department));
+		assertNotNull("failure - persisted hrd returns null", persistedHrd);
 
-	assertEquals(
-		"failure - status not 500",
-		HttpStatus.INTERNAL_SERVER_ERROR.value(),
-		response.getResponse().getStatus());
+		verify(departmentService, times(1)).save(any(Department.class));
 
-	assertTrue(
-		"failure - content not empty",
-		response.getResponse().getContentAsString().trim().length() == 0);
+		assertContentEquals(department, persistedHrd);
 
-    }
+	}
 
-    private MvcResult postRequest(String content) throws Exception {
-	return mockMvc
-		.perform(
-			MockMvcRequestBuilders
-				.post(BASE_URI)
-				.content(content)
-				.accept(MediaType.APPLICATION_JSON_VALUE)
-				.contentType(MediaType.APPLICATION_JSON_VALUE))
-		.andReturn();
-    }
+	@Test
+	public void whenSavingNotSuccessfullThenShouldReturnInternalServerError() throws Exception {
+		Department department = getSingleDepartment(1L);
 
-    @Test
-    public void whenUpdatingNonExistingResourceThenShouldReturnNotFound()
-	    throws Exception {
-	Department department = getSingleDepartment(1L);
+		when(departmentService.save(any(Department.class))).thenReturn(null);
 
-	when(departmentService.update(any(Department.class))).thenReturn(null);
+		MvcResult response = postRequest(super.objectToJson(department));
 
-	MvcResult response = putRequest(super.objectToJson(department), Long.MAX_VALUE);
+		assertEquals("failure - status not 500", HttpStatus.INTERNAL_SERVER_ERROR.value(),
+				response.getResponse().getStatus());
 
-	assertNotFoundStatusAndHasNoContent(response.getResponse());
-    }
-
-    @Test
-    public void whenUpdatingExistingResourceThenShouldReturnUpdatedEntity()
-	    throws JsonProcessingException, Exception {
-	Department department = getSingleDepartment(1L);
-
-	department.setDepartmentCode("SDD UP");
-	department.setDepartmentName("SOFTWARE DEVELOPMENT DEPARTMENT TEST");
-	department.setActive(false);
-
-	when(departmentService.update(any(Department.class))).thenReturn(department);
-
-	MvcResult response = putRequest(
-		super.objectToJson(department),
-		department.getId());
-
-	verify(departmentService, times(1)).update(any(Department.class));
-
-	Department updatedEntity = super.jsonToObject(
-		response.getResponse().getContentAsString(),
-		Department.class);
-
-	assertContentEquals(department, updatedEntity);
-    }
-
-    @Test
-    public void whenDeletingNonExistingResourceThenShouldReturnNotFound()
-	    throws Exception {
-
-	when(departmentService.findOne(any(Long.class))).thenReturn(null);
-
-	MvcResult response = mockMvc
-		.perform(
-			MockMvcRequestBuilders
-				.delete(BASE_URI + "/" + any(Long.class).longValue()))
-		.andReturn();
-
-	assertNotFoundStatusAndHasNoContent(response.getResponse());
-
-    }
-
-    @Test
-    public void whenDeletingExistingResourceThenShouldReturnOk() throws Exception {
-	Department department = getSingleDepartment(1L);
-
-	when(departmentService.findOne(any(Long.class))).thenReturn(department);
-
-	MvcResult response = mockMvc
-		.perform(
-			MockMvcRequestBuilders
-				.delete(BASE_URI + "/" + department.getId()))
-		.andReturn();
-
-	assertEquals(
-		"failure - status not NO_CONTENT",
-		HttpStatus.NO_CONTENT.value(),
-		response.getResponse().getStatus());
-
-	assertTrue(
-		"failure - response has content",
-		response.getResponse().getContentAsString().trim().length() == 0);
-
-	verify(departmentService, times(1)).findOne(any(Long.class));
-
-	verify(departmentService, times(1)).delete(any(Long.class));
-
-    }
-
-    private MvcResult putRequest(String content, Long id) throws Exception {
-	return mockMvc
-		.perform(
-			MockMvcRequestBuilders
-				.put(BASE_URI + "/" + id)
-				.accept(MediaType.APPLICATION_JSON_VALUE)
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.content(content))
-		.andReturn();
-    }
-
-    private void assertSuccessStatusAndHasContent(MockHttpServletResponse response)
-	    throws Exception {
-	assertEquals(
-		"failure - status not 200",
-		HttpStatus.OK.value(),
-		response.getStatus());
-	assertTrue(
-		"failure - content empty",
-		response.getContentAsString().trim().length() > 0);
-	logger.info("content is > " + response.getContentAsString());
-    }
-
-    private void assertNotFoundStatusAndHasNoContent(MockHttpServletResponse response)
-	    throws Exception {
-	assertEquals(
-		"failure - has fetched non existing department",
-		HttpStatus.NOT_FOUND.value(),
-		response.getStatus());
-	assertTrue(
-		"failure - 404 page content is not empty",
-		response.getContentAsString().trim().length() == 0);
-	logger.info("content is > " + response.getContentAsString());
-    }
-
-    private void assertContentEquals(Department expected, Department actual) {
-	assertEquals(
-		"failure - department code not equal",
-		expected.getDepartmentCode(),
-		actual.getDepartmentCode());
-	assertEquals(
-		"failure - department name not equal",
-		expected.getDepartmentName(),
-		actual.getDepartmentName());
-	assertEquals(
-		"failure - department status not equal",
-		expected.isActive(),
-		actual.isActive());
-    }
+		assertTrue("failure - content not empty", response.getResponse().getContentAsString().trim().length() == 0);
+
+	}
+
+	private MvcResult postRequest(String content) throws Exception {
+		return mockMvc.perform(MockMvcRequestBuilders.post(BASE_URI).content(content)
+				.accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)).andReturn();
+	}
+
+	@Test
+	public void whenUpdatingNonExistingResourceThenShouldReturnNotFound() throws Exception {
+		Department department = getSingleDepartment(1L);
+
+		when(departmentService.update(any(Department.class))).thenReturn(null);
+
+		MvcResult response = putRequest(super.objectToJson(department), Long.MAX_VALUE);
+
+		assertNotFoundStatusAndHasNoContent(response.getResponse());
+	}
+
+	@Test
+	public void whenUpdatingExistingResourceThenShouldReturnUpdatedEntity() throws JsonProcessingException, Exception {
+		Department department = getSingleDepartment(1L);
+
+		department.setDepartmentCode("SDD UP");
+		department.setDepartmentName("SOFTWARE DEVELOPMENT DEPARTMENT TEST");
+		department.setActive(false);
+
+		when(departmentService.update(any(Department.class))).thenReturn(department);
+
+		MvcResult response = putRequest(super.objectToJson(department), department.getId());
+
+		verify(departmentService, times(1)).update(any(Department.class));
+
+		Department updatedEntity = super.jsonToObject(response.getResponse().getContentAsString(), Department.class);
+
+		assertContentEquals(department, updatedEntity);
+	}
+
+	@Test
+	public void whenDeletingNonExistingResourceThenShouldReturnNotFound() throws Exception {
+
+		when(departmentService.findOne(any(Long.class))).thenReturn(null);
+
+		MvcResult response = mockMvc
+				.perform(MockMvcRequestBuilders.delete(BASE_URI + "/" + any(Long.class).longValue())).andReturn();
+
+		assertNotFoundStatusAndHasNoContent(response.getResponse());
+
+	}
+
+	@Test
+	public void whenDeletingExistingResourceThenShouldReturnOk() throws Exception {
+		Department department = getSingleDepartment(1L);
+
+		when(departmentService.findOne(any(Long.class))).thenReturn(department);
+
+		MvcResult response = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/" + department.getId()))
+				.andReturn();
+
+		assertEquals("failure - status not NO_CONTENT", HttpStatus.NO_CONTENT.value(),
+				response.getResponse().getStatus());
+
+		assertTrue("failure - response has content", response.getResponse().getContentAsString().trim().length() == 0);
+
+		verify(departmentService, times(1)).findOne(any(Long.class));
+
+		verify(departmentService, times(1)).delete(any(Long.class));
+
+	}
+
+	private MvcResult putRequest(String content, Long id) throws Exception {
+		return mockMvc.perform(MockMvcRequestBuilders.put(BASE_URI + "/" + id).accept(MediaType.APPLICATION_JSON_VALUE)
+				.contentType(MediaType.APPLICATION_JSON_VALUE).content(content)).andReturn();
+	}
+
+	private void assertSuccessStatusAndHasContent(MockHttpServletResponse response) throws Exception {
+		assertEquals("failure - status not 200", HttpStatus.OK.value(), response.getStatus());
+		assertTrue("failure - content empty", response.getContentAsString().trim().length() > 0);
+		logger.info("content is > " + response.getContentAsString());
+	}
+
+	private void assertNotFoundStatusAndHasNoContent(MockHttpServletResponse response) throws Exception {
+		assertEquals("failure - has fetched non existing department", HttpStatus.NOT_FOUND.value(),
+				response.getStatus());
+		assertTrue("failure - 404 page content is not empty", response.getContentAsString().trim().length() == 0);
+		logger.info("content is > " + response.getContentAsString());
+	}
+
+	private void assertContentEquals(Department expected, Department actual) {
+		assertEquals("failure - department code not equal", expected.getDepartmentCode(), actual.getDepartmentCode());
+		assertEquals("failure - department name not equal", expected.getDepartmentName(), actual.getDepartmentName());
+		assertEquals("failure - department status not equal", expected.isActive(), actual.isActive());
+	}
 }
