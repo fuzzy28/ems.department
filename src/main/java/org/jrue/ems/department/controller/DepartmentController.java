@@ -2,6 +2,8 @@ package org.jrue.ems.department.controller;
 
 import java.util.Collection;
 
+import javax.validation.Valid;
+
 import org.jrue.ems.department.domain.Department;
 import org.jrue.ems.department.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,8 @@ public class DepartmentController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<Collection<Department>> getAllDepartments() {
-	return new ResponseEntity<Collection<Department>>(departmentService.findAll(),
+	return new ResponseEntity<Collection<Department>>(
+		departmentService.findAll(),
 		HttpStatus.OK);
     }
 
@@ -56,7 +59,8 @@ public class DepartmentController {
 	    method = RequestMethod.POST,
 	    consumes = MediaType.APPLICATION_JSON_VALUE,
 	    produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Department> saveDepartment(@RequestBody Department persist) {
+    public ResponseEntity<Department> saveDepartment(
+	    @Valid @RequestBody Department persist) {
 
 	ResponseEntity<Department> response = null;
 	Department department = departmentService.save(persist);
@@ -74,7 +78,8 @@ public class DepartmentController {
 	    method = RequestMethod.PUT,
 	    consumes = MediaType.APPLICATION_JSON_VALUE,
 	    produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Department> updateDepartment(@RequestBody Department persist) {
+    public ResponseEntity<Department> updateDepartment(
+	    @Valid @RequestBody Department persist) {
 
 	ResponseEntity<Department> response = null;
 	Department department = departmentService.update(persist);

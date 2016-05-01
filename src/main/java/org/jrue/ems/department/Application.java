@@ -5,8 +5,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.guava.GuavaCacheManager;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -33,4 +35,11 @@ public class Application {
 	return cacheManager;
     }
 
+    @Bean
+    public MessageSource messageSource() {
+	ReloadableResourceBundleMessageSource messageBundle = new ReloadableResourceBundleMessageSource();
+	messageBundle.setBasename("classpath:messages/messages");
+	messageBundle.setDefaultEncoding("UTF-8");
+	return messageBundle;
+    }
 }

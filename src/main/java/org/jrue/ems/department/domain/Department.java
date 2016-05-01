@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * Department Resource
@@ -16,49 +18,53 @@ import javax.persistence.Id;
 @Entity
 public class Department {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(name = "departmentcode")
-	private String departmentCode;
+    @Column(name = "departmentcode")
+    @NotNull(message = "err.departmentcode.notnull")
+    @Size(min = 1, max = 10, message = "err.departmentcode.size")
+    private String departmentCode;
 
-	@Column(name = "departmentname")
-	private String departmentName;
+    @Column(name = "departmentname")
+    @NotNull(message = "err.departmentname.notnull")
+    @Size(min = 1, max = 100, message = "err.departmentname.size")
+    private String departmentName;
 
-	@Column
-	private boolean active;
+    @Column
+    private boolean active = true;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+	return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+	this.id = id;
+    }
 
-	public String getDepartmentCode() {
-		return departmentCode;
-	}
+    public String getDepartmentCode() {
+	return departmentCode;
+    }
 
-	public void setDepartmentCode(String departmentCode) {
-		this.departmentCode = departmentCode;
-	}
+    public void setDepartmentCode(String departmentCode) {
+	this.departmentCode = departmentCode;
+    }
 
-	public String getDepartmentName() {
-		return departmentName;
-	}
+    public String getDepartmentName() {
+	return departmentName;
+    }
 
-	public void setDepartmentName(String departmentName) {
-		this.departmentName = departmentName;
-	}
+    public void setDepartmentName(String departmentName) {
+	this.departmentName = departmentName;
+    }
 
-	public boolean isActive() {
-		return active;
-	}
+    public boolean isActive() {
+	return active;
+    }
 
-	public void setActive(boolean active) {
-		this.active = active;
-	}
+    public void setActive(boolean active) {
+	this.active = active;
+    }
 
 }
