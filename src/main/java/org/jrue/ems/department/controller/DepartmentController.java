@@ -5,6 +5,9 @@ import java.util.Collection;
 import javax.validation.Valid;
 
 import org.jrue.ems.department.domain.Department;
+import org.jrue.ems.department.exception.DepartmentIdNotConsistentException;
+import org.jrue.ems.department.exception.DepartmentNotFoundException;
+import org.jrue.ems.department.exception.DepartmentNotPersistedException;
 import org.jrue.ems.department.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -32,68 +35,83 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DepartmentController {
 
-	@Autowired
-	private DepartmentService departmentService;
+    @Autowired
+    private DepartmentService departmentService;
 
-	@RequestMapping(method = RequestMethod.GET)
-	public ResponseEntity<Collection<Department>> getAllDepartments() {
-		return new ResponseEntity<Collection<Department>>(departmentService.findAll(), HttpStatus.OK);
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<Collection<Department>> getAllDepartments() {
+	return new ResponseEntity<Collection<Department>>(
+		departmentService.findAll(),
+		HttpStatus.OK);
+    }
+
+    @RequestMapping(path = "/{id}", method = RequestMethod.GET)
+    public ResponseEntity<Department> getDepartmentById(
+	    @PathVariable("id") Long departmentId) {
+
+	Department department = departmentService.findOne(departmentId);
+	ResponseEntity<Department> response = null;
+	if (department == null) {
+	    throw new DepartmentNotFoundException();
+	} else {
+	    response = new ResponseEntity<Department>(department, HttpStatus.OK);
+	}
+	return response;
+    }
+
+    @RequestMapping(
+	    method = RequestMethod.POST,
+	    consumes = MediaType.APPLICATION_JSON_VALUE,
+	    produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Department> saveDepartment(
+	    @Valid @RequestBody Department persist) {
+
+	if (persist == null || persist.getId() != null) {
+	    throw new DepartmentNotPersistedException();
 	}
 
-	@RequestMapping(path = "/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Department> getDepartmentById(@PathVariable("id") Long departmentId) {
+	Department department = departmentService.save(persist);
+	HttpHeaders headers = new HttpHeaders();
+	headers.add("location", String.format("/departments/%d", department.getId()));
+	return new ResponseEntity<Department>(department, headers, HttpStatus.CREATED);
+    }
 
-		Department department = departmentService.findOne(departmentId);
-		ResponseEntity<Department> response = null;
-		if (department == null) {
-			response = new ResponseEntity<Department>(HttpStatus.NOT_FOUND);
-		} else {
-			response = new ResponseEntity<Department>(department, HttpStatus.OK);
-		}
-		return response;
+    @RequestMapping(
+	    path = "/{id}",
+	    method = RequestMethod.PUT,
+	    consumes = MediaType.APPLICATION_JSON_VALUE,
+	    produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Department> updateDepartment(
+	    @Valid @RequestBody Department persist,
+	    @PathVariable("id") Long departmentId) {
+
+	if (persist.getId() != null && persist.getId() != departmentId) {
+	    throw new DepartmentIdNotConsistentException();
 	}
 
-	@RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Department> saveDepartment(@Valid @RequestBody Department persist) {
-
-		ResponseEntity<Department> response = null;
-		Department department = departmentService.save(persist);
-		if (department == null) {
-			response = new ResponseEntity<Department>(HttpStatus.INTERNAL_SERVER_ERROR);
-		} else {
-			HttpHeaders headers = new HttpHeaders();
-			headers.add("location", String.format("/departments/%d", department.getId()));
-			response = new ResponseEntity<Department>(department, headers, HttpStatus.CREATED);
-		}
-
-		return response;
+	ResponseEntity<Department> response = null;
+	Department department = departmentService.update(persist);
+	if (department == null) {
+	    throw new DepartmentNotFoundException();
+	} else {
+	    response = new ResponseEntity<Department>(department, HttpStatus.OK);
 	}
 
-	@RequestMapping(path = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Department> updateDepartment(@Valid @RequestBody Department persist) {
+	return response;
+    }
 
-		ResponseEntity<Department> response = null;
-		Department department = departmentService.update(persist);
-		if (department == null) {
-			response = new ResponseEntity<Department>(HttpStatus.NOT_FOUND);
-		} else {
-			response = new ResponseEntity<Department>(department, HttpStatus.OK);
-		}
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Department> deleteDepartmentById(
+	    @PathVariable("id") Long departmentId) {
 
-		return response;
+	ResponseEntity<Department> response = null;
+	if (departmentService.findOne(departmentId) == null) {
+	    throw new DepartmentNotFoundException();
+	} else {
+	    departmentService.delete(departmentId);
+	    response = new ResponseEntity<Department>(HttpStatus.NO_CONTENT);
 	}
 
-	@RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<Department> deleteDepartmentById(@PathVariable("id") Long departmentId) {
-
-		ResponseEntity<Department> response = null;
-		if (departmentService.findOne(departmentId) == null) {
-			response = new ResponseEntity<Department>(HttpStatus.NOT_FOUND);
-		} else {
-			departmentService.delete(departmentId);
-			response = new ResponseEntity<Department>(HttpStatus.NO_CONTENT);
-		}
-
-		return response;
-	}
+	return response;
+    }
 }

@@ -3,7 +3,10 @@ package org.jrue.ems.department.controller;
 import org.jrue.ems.department.dto.FieldErrorDTO;
 import org.jrue.ems.department.dto.RestErrorDTO;
 import org.jrue.ems.department.dto.ValidationErrorDTO;
-import org.jrue.ems.department.util.MessageLocalizer;
+import org.jrue.ems.department.exception.DepartmentIdNotConsistentException;
+import org.jrue.ems.department.exception.DepartmentNotFoundException;
+import org.jrue.ems.department.exception.DepartmentNotPersistedException;
+import org.jrue.ems.department.service.MessageLocalizerService;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -31,93 +34,167 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
 
-	@Autowired
-	private MessageLocalizer localizer;
+    @Autowired
+    private MessageLocalizerService localizer;
 
-	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex,
-			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
-		ValidationErrorDTO validationErrorDTO = new ValidationErrorDTO();
-		for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-			final FieldErrorDTO fe = new FieldErrorDTO(fieldError.getField(),
-					localizer.localizeMessage(fieldError.getDefaultMessage()));
-			validationErrorDTO.addFieldError(fe);
-		}
-		return handleExceptionInternal(ex, validationErrorDTO, headers, status, request);
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+	    final MethodArgumentNotValidException ex, final HttpHeaders headers,
+	    final HttpStatus status, final WebRequest request) {
+	ValidationErrorDTO validationErrorDTO = new ValidationErrorDTO();
+	for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+	    final FieldErrorDTO fe = new FieldErrorDTO(
+		    fieldError.getField(),
+		    localizer.localizeMessage(fieldError.getDefaultMessage()));
+	    validationErrorDTO.addFieldError(fe);
 	}
+	return handleExceptionInternal(ex, validationErrorDTO, headers, status, request);
+    }
 
-	@Override
-	protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex,
-			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
-		RestErrorDTO restErrorDTO = new RestErrorDTO(System.currentTimeMillis(), status,
-				localizer.localizeMessage("err.rest.messagenotreadable.error"),
-				localizer.localizeMessage("err.rest.messagenotreabable.message"));
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+	    final HttpMessageNotReadableException ex, final HttpHeaders headers,
+	    final HttpStatus status, final WebRequest request) {
+	RestErrorDTO restErrorDTO = new RestErrorDTO(
+		System.currentTimeMillis(),
+		status,
+		localizer.localizeMessage("err.rest.messagenotreadable.error"),
+		localizer.localizeMessage("err.rest.messagenotreabable.message"));
 
-		return handleExceptionInternal(ex, restErrorDTO, headers, status, request);
-	}
+	return handleExceptionInternal(ex, restErrorDTO, headers, status, request);
+    }
 
-	@Override
-	protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(final HttpMediaTypeNotSupportedException ex,
-			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
-		final StringBuilder message = new StringBuilder(
-				localizer.localizeMessage("err.rest.unsupportedmediatype.message"));
-		ex.getSupportedMediaTypes().forEach(m -> message.append(m + " "));
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(
+	    final HttpMediaTypeNotSupportedException ex, final HttpHeaders headers,
+	    final HttpStatus status, final WebRequest request) {
+	final StringBuilder message = new StringBuilder(
+		localizer.localizeMessage("err.rest.unsupportedmediatype.message"));
+	ex.getSupportedMediaTypes().forEach(m -> message.append(m + " "));
 
-		final RestErrorDTO restErrorDTO = new RestErrorDTO(System.currentTimeMillis(), status,
-				localizer.localizeMessage("err.rest.unsupportedmediatype.error"), trimStringBuilder(message));
+	final RestErrorDTO restErrorDTO = new RestErrorDTO(
+		System.currentTimeMillis(),
+		status,
+		localizer.localizeMessage("err.rest.unsupportedmediatype.error"),
+		trimStringBuilder(message));
 
-		return new ResponseEntity<Object>(restErrorDTO, new HttpHeaders(), status);
-	}
+	return new ResponseEntity<Object>(restErrorDTO, new HttpHeaders(), status);
+    }
 
-	@Override
-	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
-			final HttpRequestMethodNotSupportedException ex, final HttpHeaders headers, final HttpStatus status,
-			final WebRequest request) {
-		final StringBuilder message = new StringBuilder(
-				localizer.localizeMessage("err.rest.methodnotsupported.message"));
-		ex.getSupportedHttpMethods().forEach(m -> message.append(m).append(" "));
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
+	    final HttpRequestMethodNotSupportedException ex, final HttpHeaders headers,
+	    final HttpStatus status, final WebRequest request) {
+	final StringBuilder message = new StringBuilder(
+		localizer.localizeMessage("err.rest.methodnotsupported.message"));
+	ex.getSupportedHttpMethods().forEach(m -> message.append(m).append(" "));
 
-		final RestErrorDTO restErrorDTO = new RestErrorDTO(System.currentTimeMillis(), status,
-				localizer.localizeMessage("err.rest.methodnotsupported.error"), trimStringBuilder(message));
+	final RestErrorDTO restErrorDTO = new RestErrorDTO(
+		System.currentTimeMillis(),
+		status,
+		localizer.localizeMessage("err.rest.methodnotsupported.error"),
+		trimStringBuilder(message));
 
-		return new ResponseEntity<Object>(restErrorDTO, new HttpHeaders(), status);
-	}
+	return new ResponseEntity<Object>(restErrorDTO, new HttpHeaders(), status);
+    }
 
-	@ExceptionHandler({ Exception.class })
-	public ResponseEntity<Object> handleAllException(final Exception ex, final WebRequest request) {
+    @ExceptionHandler({ Exception.class })
+    public ResponseEntity<Object> handleAllException(final Exception ex,
+	    final WebRequest request) {
 
-		final RestErrorDTO restErrorDTO = new RestErrorDTO(System.currentTimeMillis(), HttpStatus.INTERNAL_SERVER_ERROR,
-				localizer.localizeMessage("err.rest.internalservererror.error"),
-				localizer.localizeMessage("err.rest.internalservererror.message"));
-		return new ResponseEntity<Object>(restErrorDTO, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+	final RestErrorDTO restErrorDTO = new RestErrorDTO(
+		System.currentTimeMillis(),
+		HttpStatus.INTERNAL_SERVER_ERROR,
+		localizer.localizeMessage("err.rest.internalservererror.error"),
+		localizer.localizeMessage("err.rest.internalservererror.message"));
+	return new ResponseEntity<Object>(
+		restErrorDTO,
+		new HttpHeaders(),
+		HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-	@Override
-	protected ResponseEntity<Object> handleNoHandlerFoundException(final NoHandlerFoundException ex,
-			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleNoHandlerFoundException(
+	    final NoHandlerFoundException ex, final HttpHeaders headers,
+	    final HttpStatus status, final WebRequest request) {
 
-		final StringBuilder message = new StringBuilder(localizer.localizeMessage("err.rest.notfound.message"))
-				.append(ex.getHttpMethod() + " ").append(ex.getRequestURL());
+	final StringBuilder message = new StringBuilder(
+		localizer.localizeMessage("err.rest.notfound.message"))
+			.append(ex.getHttpMethod() + " ")
+			.append(ex.getRequestURL());
 
-		final RestErrorDTO restErrorDTO = new RestErrorDTO(System.currentTimeMillis(), HttpStatus.NOT_FOUND,
-				localizer.localizeMessage("err.rest.notfound.error"), message.toString());
+	final RestErrorDTO restErrorDTO = new RestErrorDTO(
+		System.currentTimeMillis(),
+		HttpStatus.NOT_FOUND,
+		localizer.localizeMessage("err.rest.notfound.error"),
+		message.toString());
 
-		return new ResponseEntity<Object>(restErrorDTO, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+	return new ResponseEntity<Object>(
+		restErrorDTO,
+		new HttpHeaders(),
+		HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-	@Override
-	protected ResponseEntity<Object> handleTypeMismatch(final TypeMismatchException ex, final HttpHeaders headers,
-			final HttpStatus status, final WebRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(final TypeMismatchException ex,
+	    final HttpHeaders headers, final HttpStatus status,
+	    final WebRequest request) {
 
-		final String error = String.format(localizer.localizeMessage("err.rest.typemismatch.message"), ex.getValue(),
-				ex.getRequiredType().getSimpleName());
+	final String error = String.format(
+		localizer.localizeMessage("err.rest.typemismatch.message"),
+		ex.getValue(),
+		ex.getRequiredType().getSimpleName());
 
-		final RestErrorDTO restErrorDTO = new RestErrorDTO(System.currentTimeMillis(), status,
-				localizer.localizeMessage("err.rest.typemismatch.error"), error);
-		return new ResponseEntity<Object>(restErrorDTO, headers, status);
-	}
+	final RestErrorDTO restErrorDTO = new RestErrorDTO(
+		System.currentTimeMillis(),
+		status,
+		localizer.localizeMessage("err.rest.typemismatch.error"),
+		error);
+	return new ResponseEntity<Object>(restErrorDTO, headers, status);
+    }
 
-	private String trimStringBuilder(StringBuilder sb) {
-		return sb.substring(0, sb.length() - 1);
-	}
+    @ExceptionHandler(DepartmentNotFoundException.class)
+    public ResponseEntity<RestErrorDTO> handleDepartmentNotFound(
+	    final DepartmentNotFoundException dnf) {
+
+	return handleCustomException(
+		HttpStatus.NOT_FOUND,
+		"err.rest.notfound.error",
+		"err.ctrl.departmentnotfound.message");
+    }
+
+    @ExceptionHandler(DepartmentNotPersistedException.class)
+    public ResponseEntity<RestErrorDTO> handleDepartmentNotPersisted(
+	    final DepartmentNotPersistedException dnf) {
+
+	return handleCustomException(
+		HttpStatus.BAD_REQUEST,
+		"err.rest.badrequest.error",
+		"err.ctrl.departmentnotpersisted.message");
+    }
+
+    @ExceptionHandler(DepartmentIdNotConsistentException.class)
+    public ResponseEntity<RestErrorDTO> handleDepartmentNotPersisted(
+	    final DepartmentIdNotConsistentException dnf) {
+
+	return handleCustomException(
+		HttpStatus.BAD_REQUEST,
+		"err.rest.badrequest.error",
+		"err.ctrl.departmentidnotconsistent.message");
+    }
+
+    public ResponseEntity<RestErrorDTO> handleCustomException(HttpStatus status,
+	    String error, String message) {
+
+	final RestErrorDTO restErrorDTO = new RestErrorDTO(
+		System.currentTimeMillis(),
+		status,
+		localizer.localizeMessage(error),
+		localizer.localizeMessage(message));
+	return new ResponseEntity<RestErrorDTO>(restErrorDTO, restErrorDTO.getStatus());
+    }
+
+    private String trimStringBuilder(StringBuilder sb) {
+	return sb.substring(0, sb.length() - 1);
+    }
 }

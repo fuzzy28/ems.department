@@ -23,59 +23,60 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class DepartmentServiceBean implements DepartmentService {
 
-	@Autowired
-	private DepartmentRepository departmentRepository;
+    @Autowired
+    private DepartmentRepository departmentRepository;
 
-	@Override
-	public Collection<Department> findAll() {
-		return departmentRepository.findAll();
+    @Override
+    public Collection<Department> findAll() {
+	return departmentRepository.findAll();
+    }
+
+    @Override
+    @Cacheable(value = "departments", key = "#id")
+    public Department findOne(Long id) {
+	return departmentRepository.findOne(id);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    @CachePut(value = "departments", key = "#result.id", condition = "#result != null")
+    public Department save(Department persist) {
+
+	Department department = null;
+	if (persist != null && persist.getId() == null) {
+	    department = saveOrUpdate(persist);
 	}
 
-	@Override
-	@Cacheable(value = "departments", key = "#id")
-	public Department findOne(Long id) {
-		return departmentRepository.findOne(id);
+	return department;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    @CachePut(value = "departments", key = "#update.id", condition = "#result != null")
+    public Department update(Department update) {
+
+	Department department = null;
+	if (update != null && update.getId() != null
+		&& departmentRepository.findOne(update.getId()) != null) {
+	    department = saveOrUpdate(update);
 	}
 
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	@CachePut(value = "departments", key = "#result.id", condition = "#result != null")
-	public Department save(Department persist) {
+	return department;
+    }
 
-		Department department = null;
-		if (persist != null && persist.getId() == null) {
-			department = saveOrUpdate(persist);
-		}
+    private Department saveOrUpdate(Department department) {
+	return departmentRepository.save(department);
+    }
 
-		return department;
-	}
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    @CacheEvict(value = "departments", key = "#id")
+    public void delete(Long id) {
+	departmentRepository.delete(id);
+    }
 
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	@CachePut(value = "departments", key = "#update.id", condition = "#result != null")
-	public Department update(Department update) {
-
-		Department department = null;
-		if (update != null && update.getId() != null && departmentRepository.findOne(update.getId()) != null) {
-			department = saveOrUpdate(update);
-		}
-
-		return department;
-	}
-
-	private Department saveOrUpdate(Department department) {
-		return departmentRepository.save(department);
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	@CacheEvict(value = "departments", key = "#id")
-	public void delete(Long id) {
-		departmentRepository.delete(id);
-	}
-
-	@Override
-	public long countAll() {
-		return departmentRepository.count();
-	}
+    @Override
+    public long countAll() {
+	return departmentRepository.count();
+    }
 }
