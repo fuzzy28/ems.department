@@ -1,6 +1,6 @@
 package org.jrue.ems.department.service;
 
-public interface MessageLocalizerService {
+public interface MessageLocalizer {
 
     String localizeMessage(String messageKey);
 }

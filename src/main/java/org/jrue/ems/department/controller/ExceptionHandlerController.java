@@ -6,7 +6,7 @@ import org.jrue.ems.department.dto.ValidationErrorDTO;
 import org.jrue.ems.department.exception.DepartmentIdNotConsistentException;
 import org.jrue.ems.department.exception.DepartmentNotFoundException;
 import org.jrue.ems.department.exception.DepartmentNotPersistedException;
-import org.jrue.ems.department.service.MessageLocalizerService;
+import org.jrue.ems.department.service.MessageLocalizer;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -35,7 +35,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
 
     @Autowired
-    private MessageLocalizerService localizer;
+    private MessageLocalizer localizer;
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
