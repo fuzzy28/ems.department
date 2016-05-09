@@ -6,7 +6,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MessageLocalizerServiceBean implements MessageLocalizerService {
+public class MessageLocalizerBean implements MessageLocalizer {
 
     @Autowired
     private MessageSource messageSource;
