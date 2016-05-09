@@ -7,6 +7,14 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
+/**
+ * The DepartmentServiceHealthIndicator class provides additional information to
+ * /health actuator end point.
+ * 
+ * @author Joel F. Ruelos Jr.
+ * @since 1.0
+ */
+
 @Component
 public class DepartmentServiceHealthIndicator implements HealthIndicator {
 
@@ -22,7 +30,8 @@ public class DepartmentServiceHealthIndicator implements HealthIndicator {
 	long size = departmentService.countAll();
 	boolean hasDepartment = size > 0;
 	return (hasDepartment ? Health.up() : Health.down())
-		.withDetail("info",
+		.withDetail(
+			"info",
 			String.format(indicatorMessage, hasDepartment ? size : "no"))
 		.build();
 
