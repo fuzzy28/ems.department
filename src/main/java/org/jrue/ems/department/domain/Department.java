@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /**
- * Department Resource
+ * Department class is the most important entity of this service.
  * 
  * @author Joel F. Ruelos Jr.
  * @since 1.0

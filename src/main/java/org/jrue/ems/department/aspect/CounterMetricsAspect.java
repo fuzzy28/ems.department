@@ -8,6 +8,14 @@ import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+/**
+ * The CounterMetricsAspect class provides additional information to /metrics
+ * actuator end point on how many times a service has been invoked.
+ * 
+ * @author Joel F. Ruelos Jr.
+ * @since 1.0
+ */
+
 @Aspect
 @Component
 @Order(1)
